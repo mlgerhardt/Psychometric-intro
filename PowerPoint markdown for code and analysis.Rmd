@@ -1,12 +1,132 @@
 ---
-title: "Psychometrics Intro"
+title: "Introduction to Psychometrics and Acale Sevelopment"
 author: "Micah Gerhardt"
 date: "11/12/2021"
 output: powerpoint_presentation
 ---
 
 
-Psychometrics is a large field.
+## Introduction
+-Psychometrics is a large field that deals with questionnaire development and measurement.
+-This presentation is only a small part of what is involved and is focused more on the programming/statistical components
+-This is also going to focus on pretty basic concepts
+
+## What is Psychometrics?
+-As a field psychometrics is concerned with measurement, testing, and scale development
+-This includes concepts such as validity, reliability, and the theory of testing
+-Two of the major methods used for scale development are: Factor Analysis and Item Response Theory 
+-We will only cover factor analysis today
+
+## History of Factor Analysis
+-Developed in 1904 by Charles Spearman to support his hypothesis of intelligence
+
+-Resulted in Spearman's g, a general factor of intelligence
+
+-Intelligence would go on to become a central concept in Psychology 
+
+-Factor analysis would be widely used in a variety of applications and is still one of the most used methods today
+
+-Louis Thurstone would later develop multifactor models and discussed issues such as rotation and simple structure
+
+## What is Factor Analysis?
+-Factor analysis is a method of grouping measured variables together by shared variance
+-Not enough time to get into the math but there are a number of resources (It is all matrix algebra)
+-In modern day being able to do the matrix algebra by hand isn't that big of a deal. Commonly a 1 time assignment in factor analysis classes to do a simple factor analysis
+-Factor analysis involves estimating latent variable(s) from manifest/measured variables 
+
+## Latent Variables
+-One can view there being two type of variables: latent variables and manifest or measured variables
+-Manifest variables are what you are used to and can be directly measured (e.g., Height, blood pressure)
+-Latent variables are thought only to exist at a latent level, in psychometrics this often means thoughts, patterns of thinking, mental state, etc.
+-Conceptually latent variables exist within the individual and **cause** them to respond to questions in certain manners
+
+## Latent Variables (continued)
+-Every latent variable is thought to be normally distributed in the population
+-You are likely already familiar with a number of latent variables
+-As a side note when estimating these we typically set a mean of 0 and variance of 1
+
+## What isn't Factor Analysis?
+-**It is not a principal component analysis**
+-The clearest difference is that in PCA the component is a linear combination of the variables
+-As stated before factor analysis views the measured variables as resulting from the underlying latent factor
+-People often gets PCA confused with factor analysis
+
+
+## Factor Analysis and Psychometrics
+-In psychometrics factor analysis is grouped into two types: Exploratory Factor Analysis (EFA) and Confirmatory Factor Analysis (CFA)
+-You will also hear them called unrestricted factor analysis and restricted factor analysis
+-The general process for scale development is:
+-Write questions
+-Get respondents
+-Examine descriptives
+-Conduct EFA
+-Conduct CFA
+-Adjust questions if needed and start again at get respondents step
+-New scales typically need to go though this process several times
+
+## Exploratory Factor Analysis
+```{r, Descriptives}
+#install.packages('psych', dependencies = T)
+library(psych)
+describe(Thurstone)
+```
+
+## Parallel Analysis
+-Best method to determine number of factors
+```{r, Parallel Analysis}
+fa.parallel(Thurstone)
+```
+-Looks like 3 factor solution is best
+
+## EFA
+```{r, EFA}
+fa(Thurstone, 3, rotate="varimax")
+fa(Thurstone, 1, rotate="oblimin")
+fa(Thurstone, 3, rotate="oblimin")
+```
+
+## Summary of EFA
+-Normally I would copy and paste the MR1, MR2, and MR3 from the last EFA into excel and highlight the large values but in the interest of time I won't do that today
+-In the interest of time we will go with the 3 factor oblimin solution
+-Normally you name the factors
+-In this case this is an old data set with three latent variables: Verbal Comprehension, Word Fluency, and Reasoning
+
+
+## CFA
+-Now that we have done the EFA we move onto the CFA
+-To get out of rotational indeterminacy we restrict paths so that there is a unique best solution
+-Will always fit worse than EFA
+
+## Software
+-Normally CFA are done in more specialized software
+-psych package is installed on the server here
+-The package, lavaan, I will use from this point on is not
+-lavaan is a super useful package and comparable software is often $500+ a year for a personal license
+
+## CFA code
+-Take the EFA factor structure and make it a CFA with only the relevant paths
+```{r, measurement model}
+library(lavaan)
+
+model <- "
+Verbal Comprehension =~ Sentences + Vocabulary + Sent.Completion
+Reasoning =~ First.Letters + Four.Letter.Words + Suffixes
+Word Fluency =~ Letter.Series + Pedigrees + Letter.Group
+"
+fit <- cfa(model, sample.cov = Thurstone, sample.nobs = 213, estimator = "ML")
+summary(fit)
+```
+
+## CFA model fit
+-Have to evaluate model fit
+```{r, model fit}
+fitMeasures(fit)
+```
+-Generally want chi-square, a comparative fit index (CFI or TLI), and an absolute fit index (RMSEA)
+-CFI or TLI want greater than .9 and prefer .95; RMSEA want below .06 if possible but below ~.09 is perhaps publishable (with great difficulty)
+-Chi-square is overly sensitive and often would reject the model, not really used for model fit
+-I would evaluate this model as being good
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 ```
