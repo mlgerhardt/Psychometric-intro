@@ -1,0 +1,156 @@
+---
+title: "Psychometric Intro Code"
+author: "Micah Gerhardt"
+date: "12/2/2021"
+output: html_document
+---
+
+## Exploratory Factor Analysis
+```{r, Descriptives}
+#install.packages('psych', dependencies = T)
+library(psych)
+describe(Thurstone)
+```
+
+## Parallel Analysis
+-Best method to determine number of factors
+```{r, Parallel Analysis}
+fa.parallel(Thurstone, n.obs=213, fm="ml")
+```
+-Looks like 3 factor solution is best
+
+## EFA
+```{r, EFA}
+fa(Thurstone, 3, rotate="varimax", n.obs=213)
+fa(Thurstone, 1, rotate="oblimin", n.obs=213)
+fa(Thurstone, 3, rotate="oblimin", n.obs=213)
+```
+
+## Summary of EFA
+-Normally I would copy and paste the MR1, MR2, and MR3 from the last EFA into excel and highlight the large values but in the interest of time I won't do that today
+
+-In the interest of time we will go with the 3 factor oblimin solution
+
+-Normally you name the factors
+
+-In this case this is an old data set with three latent variables: Verbal Comprehension, Word Fluency, and Reasoning
+
+
+## CFA code
+-Take the EFA factor structure and make it a CFA with only the relevant paths
+```{r, measurement model}
+library(lavaan)
+
+model <- "
+Verbal Comprehension =~ Sentences + Vocabulary + Sent.Completion
+Reasoning =~ First.Letters + Four.Letter.Words + Suffixes
+Word Fluency =~ Letter.Series + Pedigrees + Letter.Group
+"
+fit <- cfa(model, sample.cov = Thurstone, sample.nobs = 213, estimator = "ML")
+summary(fit)
+```
+
+## CFA model fit
+-Have to evaluate model fit
+```{r, model fit}
+fitMeasures(fit)
+```
+-Generally want chi-square, a comparative fit index (CFI or TLI), and an absolute fit index (RMSEA)
+
+-CFI or TLI want greater than .9 and prefer .95; RMSEA want below .06 if possible but below ~.09 is perhaps publishable (with great difficulty)
+
+-Chi-square is overly sensitive and often would reject the model, not really used for model fit
+
+-I would evaluate this model as being good. It is less clear what changes in RMSEA, CFI, etc mean compared to p-values, so there is some room for interpretation. 
+
+
+
+## More Advanced Topics
+Going to use another data set because it has gender. We will test invariance of the scale across gender.
+First we will use a built in function in semTools along with lavaan to do it.
+```{r, measurement invariance easy way}
+library(semTools)
+describe(bfi)
+
+basemodel <-
+"
+Openness =~ O1 + O2 + O3 + O4 + O5
+Conscientiousness =~ C1 + C2 + C3 + C4 + C5
+Extraversion =~ E1 + E2 + E3 + E4 + E5
+Agreeableness =~ A1 + A2 + A3 + A4 + A5
+Neuroticism  =~ N1 + N2 + N3 + N4 + N5
+"
+
+
+syntax.config <- measEq.syntax(configural.model = basemodel, data=bfi, group="gender")
+mod.config <- as.character(syntax.config)
+fit.config <- cfa(mod.config, data = bfi, group = "gender",
+                  parameterization = "theta")
+
+
+syntax.metric <- measEq.syntax(configural.model = basemodel, data=bfi, group="gender", group.equal = c("thresholds","loadings"))
+mod.metric <- as.character(syntax.metric)
+fit.metric <- cfa(mod.metric, data = bfi, group = "gender",
+                  parameterization = "theta")
+
+anova(fit.config, fit.metric)
+
+syntax.scalar <- measEq.syntax(configural.model = basemodel, data=bfi, group="gender", group.equal = c("thresholds","loadings", "intercepts"))
+mod.scalar <- as.character(syntax.scalar)
+fit.scalar <- cfa(mod.scalar, data = bfi, group = "gender",
+                  parameterization = "theta")
+
+anova(fit.metric, fit.scalar)
+
+
+syntax.strict <- measEq.syntax(configural.model = basemodel, data=bfi, group="gender", group.equal = c("thresholds","loadings", "intercepts", "residuals"))
+mod.strict <- as.character(syntax.strict)
+fit.strict <- cfa(mod.strict, data = bfi, group = "gender",
+                  parameterization = "theta")
+
+anova(fit.scalar, fit.strict)
+
+
+
+
+summary(compareFit(fit.config,  fit.metric, fit.scalar, fit.strict))
+```
+
+This shows metric but not scalar invariance. This suggest the scale is not invariant across gender. You normally also check how RMSEA and CFI do. Generally you want to see changes of 0.01 or less across models to conclude invariance.
+
+## Longer, manual way
+I won't do the longer way but it involves setting the restrictions yourself. I will show what it looks like. The advantage of this is that you can allow some non-invariance and it is still considered "invariant"
+
+```{r, manually}
+cat(as.character(syntax.strict))
+```
+
+
+#SEM
+I am just going to copy and paste the example from lavaan's site and talk about it.
+[link](https://lavaan.ugent.be/tutorial/sem.html)
+```{r, SEM}
+model <- '
+  # measurement model
+    ind60 =~ x1 + x2 + x3
+    dem60 =~ y1 + y2 + y3 + y4
+    dem65 =~ y5 + y6 + y7 + y8
+  # regressions
+    dem60 ~ ind60
+    dem65 ~ ind60 + dem60
+  # residual correlations
+    y1 ~~ y5
+    y2 ~~ y4 + y6
+    y3 ~~ y7
+    y4 ~~ y8
+    y6 ~~ y8
+'
+
+fit <- sem(model, data = PoliticalDemocracy)
+summary(fit, standardized = TRUE)
+
+library(lavaanPlot)
+
+lavaanPlot(model = fit,  node_options = list(shape = "box", fontname = "Helvetica"), edge_options = list(color = "grey"), coefs = TRUE)
+
+```
