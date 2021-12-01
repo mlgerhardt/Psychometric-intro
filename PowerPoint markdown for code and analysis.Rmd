@@ -1,5 +1,5 @@
 ---
-title: "Introduction to Psychometrics and Scale Sevelopment"
+title: "Introduction to Psychometrics and Scale Development"
 author: "Micah Gerhardt"
 date: "12/2/2021"
 output: powerpoint_presentation
@@ -47,9 +47,9 @@ output: powerpoint_presentation
 -Factor analysis involves estimating latent variable(s) from manifest/measured variables 
 
 ## Latent Variables
--One can view there being two type of variables: latent variables and manifest or measured variables
+-One can view there being two types of variables: latent variables and manifest or measured variables
 
--Manifest variables are what you are used to and can be directly measured (e.g., Height, blood pressure)
+-Manifest variables can be directly measured (e.g., Height, blood pressure)
 
 ## Latent Variables (continued)
 
@@ -78,14 +78,20 @@ output: powerpoint_presentation
 
 -You will also hear them called unrestricted factor analysis and restricted factor analysis
 
-## Factor Analysis and Psychometrics (continued)
+## Factor Analysis and Psychometrics
 
 -The general process for scale development is:
--Write questions
--Get respondents
--Examine descriptives
--Conduct EFA
--Conduct CFA
+
+- <font size="4">Write questions</font>
+
+- <font size="4">Get respondents</font>
+
+- <font size="4">Examine descriptives</font>
+
+- <font size="4">Conduct EFA</font>
+
+- <font size="4">Conduct CFA</font>
+
 -Adjust questions if needed and start again at get respondents step
 
 -New scales typically need to go though this process several times

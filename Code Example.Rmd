@@ -59,7 +59,7 @@ fitMeasures(fit)
 
 -CFI or TLI want greater than .9 and prefer .95; RMSEA want below .06 if possible but below ~.09 is perhaps publishable (with great difficulty)
 
--Chi-square is overly sensitive and often would reject the model, not really used for model fit
+-Chi-square is overly sensitive and often will reject the model when it shouldn't, not really used for model fit
 
 -I would evaluate this model as being good. It is less clear what changes in RMSEA, CFI, etc mean compared to p-values, so there is some room for interpretation. 
 
@@ -126,7 +126,7 @@ cat(as.character(syntax.strict))
 ```
 
 
-#SEM
+# SEM
 I am just going to copy and paste the example from lavaan's site and talk about it.
 [link](https://lavaan.ugent.be/tutorial/sem.html)
 ```{r, SEM}
